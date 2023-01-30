@@ -1,14 +1,17 @@
 package patterns;
 
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
+
+import fr.maif.commons.resourcewrapper.HttpStatusCode;
+import fr.maif.commons.resourcewrapper.Message;
 import io.vavr.collection.List;
+import io.vavr.control.Either;
 import io.vavr.control.Validation;
 import lombok.NonNull;
 import lombok.Value;
-
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 /**
  * Created by mtumilowicz on 2018-12-09.
@@ -34,5 +37,19 @@ public class Email {
                 .apply((successes, failures) -> failures.isEmpty()
                         ? Validation.valid(successes)
                         : Validation.invalid(failures.map(email -> email + " is not a valid email!")));
+    }
+
+    public static Either<java.util.List<Message>, java.util.List<String>> valid(java.util.List<String> emails) {
+        return List.ofAll(emails).partition(VALIDATOR)
+                .apply((successes, failures) -> {
+                    if (failures.isEmpty()) {
+                        return Either.right(successes.toJavaList());
+                    }
+
+                    List<Message> desc = failures.map(
+                            email -> Message.create(email + " is not a valid email!", HttpStatusCode.BAD_REQUEST, "", "", "desc",
+                                    java.util.List.of()));
+                    return Either.left(desc.asJava());
+                });
     }
 }

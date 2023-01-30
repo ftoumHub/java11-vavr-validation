@@ -6,6 +6,7 @@ Overview of vavr `Validation API`.
 _Reference_: https://softwaremill.com/javaslang-data-validation/  
 _Reference_: https://www.vavr.io/vavr-docs/#_validation  
 _Reference_: https://www.baeldung.com/vavr-validation-api
+_Reference_: https://blog.ippon.fr/2022/04/15/valider-des-donnees-avec-vavr/
 
 # preface
 The `Validation` control is an applicative functor (

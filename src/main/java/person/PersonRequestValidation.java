@@ -1,8 +1,16 @@
 package person;
 
+import static libs.validation.Assert.notNull;
+import static libs.validation.MessageGDR.F00220;
+
+import java.util.List;
+
 import address.AddressRequestValidation;
+import fr.maif.commons.resourcewrapper.Message;
 import io.vavr.collection.Seq;
+import io.vavr.control.Either;
 import io.vavr.control.Validation;
+import libs.validation.Eithers;
 import patterns.Age;
 import patterns.Email;
 import patterns.Emails;
@@ -27,5 +35,23 @@ public class PersonRequestValidation {
                         .address(address)
                         .age(Age.of(age))
                         .build());
+    }
+
+    public static Either<List<Message>, ValidPersonRequest> valid(PersonRequest request) {
+        return notNull(request, F00220)
+                .flatMap(notNull ->
+                        Eithers.zipEnd(
+                                Word.valid(request.getName()),
+                                Email.valid(request.getEmails().asJava()),
+                                AddressRequestValidation.valid(request.getAddress()),
+                                Age.valid(request.getAge()),
+                                () -> ValidPersonRequest.builder()
+                                        .name(Word.of(notNull.getName()))
+                                        .emails(notNull.getEmails().map(Email::of).transform(Emails::new))
+                                        .address(AddressRequestValidation.valid(request.getAddress()).get())
+                                        .age(Age.of(notNull.getAge()))
+                                        .build())
+                        );
+
     }
 }
